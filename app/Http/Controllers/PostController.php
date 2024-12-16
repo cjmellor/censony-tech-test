@@ -56,7 +56,16 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        $post->load(['author', 'category']);
+
+        return Inertia::render('Posts/Show', [
+            'post' => $post,
+            // Pass authorisation information to the frontend
+            'can' => [
+                'edit' => auth()->check() && auth()->user()->can('update', $post),
+                'delete' => auth()->check() && auth()->user()->can('delete', $post),
+            ]
+        ]);
     }
 
     /**
