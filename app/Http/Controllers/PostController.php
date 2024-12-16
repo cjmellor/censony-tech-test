@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Models\Category;
 use App\Http\Requests\StorePostRequest;
-use Illuminate\Http\Request;
+use App\Models\Category;
+use App\Models\Post;
 use Inertia\Inertia;
 
 class PostController extends Controller
@@ -20,7 +19,7 @@ class PostController extends Controller
             ->paginate(10);
 
         return Inertia::render('Posts/Index', [
-            'posts' => $posts
+            'posts' => $posts,
         ]);
     }
 
@@ -30,7 +29,7 @@ class PostController extends Controller
     public function create()
     {
         return Inertia::render('Posts/Create', [
-            'categories' => Category::all()
+            'categories' => Category::all(),
         ]);
     }
 
@@ -39,6 +38,8 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+        abort_if($request->user()->cannot('create', Post::class), 403);
+
         // Create a new post with the validated data
         $post = new Post($request->validated());
 
@@ -64,7 +65,7 @@ class PostController extends Controller
             'can' => [
                 'edit' => auth()->check() && auth()->user()->can('update', $post),
                 'delete' => auth()->check() && auth()->user()->can('delete', $post),
-            ]
+            ],
         ]);
     }
 
@@ -73,15 +74,26 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        abort_if(auth()->user()->cannot('update', $post), 403);
+
+        return Inertia::render('Posts/Edit', [
+            'post' => $post->load(['category']),
+            'categories' => Category::all(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(StorePostRequest $request, Post $post)
     {
-        //
+        abort_if($request->user()->cannot('update', $post), 403);
+
+        $post->update($request->validated());
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post updated successfully.');
     }
 
     /**
@@ -89,6 +101,12 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        abort_if(auth()->user()->cannot('delete', $post), 403);
+
+        $post->delete();
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post deleted successfully.');
     }
 }
