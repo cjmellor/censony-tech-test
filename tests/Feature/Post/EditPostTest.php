@@ -3,7 +3,8 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use function Pest\Laravel\{actingAs, get, put};
+
+use function Pest\Laravel\actingAs;
 
 test('edit page shows current post data', function () {
     // First, we'll create a post with known data

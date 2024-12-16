@@ -3,7 +3,9 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use function Pest\Laravel\{actingAs, get, put, delete};
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\delete;
 
 test('accessing non-existent post returns 404', function () {
     $user = User::factory()->create();
@@ -21,7 +23,7 @@ test('attempting to edit deleted post returns 404', function () {
         ->for($user, 'author')
         ->for($category)
         ->create();
-    
+
     $postId = $post->id;
     $post->delete();
 
@@ -38,7 +40,7 @@ test('attempting to update deleted post returns 404', function () {
         ->for($user, 'author')
         ->for($category)
         ->create();
-    
+
     $postId = $post->id;
     $post->delete();
 
@@ -58,7 +60,7 @@ test('attempting to delete already deleted post returns 404', function () {
         ->for($user, 'author')
         ->for($category)
         ->create();
-    
+
     $postId = $post->id;
     $post->delete();
 
@@ -70,7 +72,7 @@ test('attempting to delete already deleted post returns 404', function () {
 test('malformed post data is rejected', function () {
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     actingAs($user)
         ->post(route('posts.store'), [
             'title' => ['an', 'array', 'instead', 'of', 'string'],  // Invalid data type

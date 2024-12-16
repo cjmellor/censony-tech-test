@@ -3,7 +3,8 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use function Pest\Laravel\{actingAs, get, put, delete};
+
+use function Pest\Laravel\actingAs;
 
 test('users can view their own posts', function () {
     $user = User::factory()->create();

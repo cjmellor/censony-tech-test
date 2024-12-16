@@ -3,7 +3,8 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use function Pest\Laravel\{actingAs, get};
+
+use function Pest\Laravel\actingAs;
 
 test('index page displays list of posts', function () {
     // Arrange
@@ -22,12 +23,11 @@ test('index page displays list of posts', function () {
         ->assertInertia(fn ($page) => $page
             ->component('Posts/Index')
             ->has('posts.data', 3)
-            ->where('posts.data.0', fn ($post) => 
-                is_string($post['title'])
+            ->where('posts.data.0', fn ($post) => is_string($post['title'])
                 && is_string($post['content'])
-                && !empty($post['published_at'])
-                && !empty($post['author']['name'])
-                && !empty($post['category']['name'])
+                && ! empty($post['published_at'])
+                && ! empty($post['author']['name'])
+                && ! empty($post['category']['name'])
             )
         );
 });
@@ -36,18 +36,18 @@ test('posts are ordered by publication date in descending order', function () {
     // Arrange
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     // Create posts with different publication dates
     $oldPost = Post::factory()
         ->for($user, 'author')
         ->for($category)
         ->create(['published_at' => now()->subDays(2)]);
-        
+
     $newPost = Post::factory()
         ->for($user, 'author')
         ->for($category)
         ->create(['published_at' => now()]);
-        
+
     $middlePost = Post::factory()
         ->for($user, 'author')
         ->for($category)
@@ -69,14 +69,14 @@ test('posts list is paginated correctly', function () {
     // Arrange
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     // Create more than one page of posts
     Post::factory()
         ->for($user, 'author')
         ->for($category)
         ->count(15)
         ->create();
-        
+
     // Act & Assert
     actingAs($user)
         ->get(route('posts.index'))

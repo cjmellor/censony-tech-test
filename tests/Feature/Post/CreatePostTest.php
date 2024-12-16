@@ -3,7 +3,10 @@
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use function Pest\Laravel\{actingAs, get, post};
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Laravel\post;
 
 test('guests cannot access post creation page', function () {
     get(route('posts.create'))
@@ -22,7 +25,7 @@ test('guests cannot create posts', function () {
 
 test('authenticated users can view post creation page', function () {
     $user = User::factory()->create();
-    
+
     actingAs($user)
         ->get(route('posts.create'))
         ->assertOk()
@@ -35,9 +38,9 @@ test('authenticated users can view post creation page', function () {
 test('published_at is automatically set when creating post', function () {
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     $now = now();
-    
+
     actingAs($user)
         ->post(route('posts.store'), [
             'title' => 'Test Post',
@@ -46,7 +49,7 @@ test('published_at is automatically set when creating post', function () {
         ]);
 
     $post = Post::latest()->first();
-    
+
     // The published_at should be within a reasonable timeframe
     expect($post)
         ->published_at->toBeInstanceOf(DateTime::class)
@@ -58,7 +61,7 @@ test('published_at is automatically set when creating post', function () {
 test('authenticated users can create posts', function () {
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     actingAs($user)
         ->post(route('posts.store'), [
             'title' => 'Test Post',
@@ -79,17 +82,17 @@ test('authenticated users can create posts', function () {
 test('post validation rules', function ($field, $value, $error) {
     $user = User::factory()->create();
     $category = Category::factory()->create();
-    
+
     // Prepare valid data
     $data = [
         'title' => 'Test Post',
         'content' => 'Test Content',
         'category_id' => $category->id,
     ];
-    
+
     // Override with test case data
     $data[$field] = $value;
-    
+
     actingAs($user)
         ->post(route('posts.store'), $data)
         ->assertInvalid([$field => $error]);
