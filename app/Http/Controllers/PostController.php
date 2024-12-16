@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Category;
+use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -36,9 +37,18 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        //
+        // Create a new post with the validated data
+        $post = new Post($request->validated());
+
+        $post->user_id = auth()->id();
+        $post->published_at = now();
+        $post->save();
+
+        return redirect()
+            ->route('posts.index')
+            ->with('success', 'Post created successfully.');
     }
 
     /**
